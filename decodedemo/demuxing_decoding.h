@@ -4,21 +4,29 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <string>
-class DemuxingDecoding(){
+
+struct FrameData {
+    uint8_t* dst_data[4];
+    int dst_linesizes[4];
+    enum AVPixelFormat pix_fmt;
+    int width;
+    int height;
+};
+class DemuxingDecoding {
 public:
-        DemusingDecode(std::wstring filename);
-        ~DemusingDecode();
-        bool getNetxtFrame(AVFrame **frame);
+    DemuxingDecoding(std::wstring filename);
+    ~DemuxingDecoding();
+    bool getNetxtFrame(FrameData &frameData);
 private:
-    int output_video_frame(AVFrame * frame);
-    int output_audio_frame(AVFrame * frame);
-    int decode_packet(AVCodecContext * dec, const AVPacket * pkt);
+    int output_video_frame(AVFrame* frame);
+    int output_audio_frame(AVFrame* frame);
+    int decode_packet(AVCodecContext* dec, const AVPacket* pkt, bool &bValidFrame);
     int open_codec_context(int* stream_idx,
-        AVCodecContext * *dec_ctx, AVFormatContext * fmt_ctx, enum AVMediaType type);
+        AVCodecContext** dec_ctx, AVFormatContext* fmt_ctx, enum AVMediaType type);
     int get_format_from_sample_fmt(const char** fmt,
         enum AVSampleFormat sample_fmt);
-    void init();
-    void unint();
+    int init();
+    void uninit();
 
 private:
     AVFormatContext* fmt_ctx;
@@ -28,7 +36,7 @@ private:
     int height;
     enum AVPixelFormat pix_fmt;
     AVStream* video_stream;
-	AVStream* audio_stream;
+    AVStream* audio_stream;
     const char* src_filename;
     const char* video_dst_filename;
     const char* audio_dst_filename;
@@ -40,9 +48,13 @@ private:
     int video_dst_bufsize;
 
     int video_stream_idx;
-	int audio_stream_idx;
+    int audio_stream_idx;
     AVFrame* frame;
     AVPacket* pkt;
     int video_frame_count;
     int audio_frame_count;
-}
+
+    bool m_isInitSuccess;
+    bool isFinish_av_read_frame;
+    bool isFinish_avcodec_receive_frame;
+};
