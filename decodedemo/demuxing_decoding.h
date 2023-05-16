@@ -28,6 +28,7 @@ private:
         AVCodecContext** dec_ctx, AVFormatContext* fmt_ctx, enum AVMediaType type);
     int get_format_from_sample_fmt(const char** fmt,
         enum AVSampleFormat sample_fmt);
+    void setFrameData(FrameData& frameData);
     int init();
     void uninit();
 

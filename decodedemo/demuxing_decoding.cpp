@@ -381,7 +381,15 @@ int DemuxingDecoding::init()
     m_isInitSuccess = (ret == 0);
     return ret;
 }
-
+void DemuxingDecoding::setFrameData(FrameData& frameData) {
+    for (int i = 0; i < 3; i++) {
+        frameData.dst_data[i] = video_dst_data[i];
+        frameData.dst_linesizes[i] = video_dst_linesize[i];
+    }
+    frameData.pix_fmt = pix_fmt;
+    frameData.width = width;
+    frameData.height = height;
+}
 bool DemuxingDecoding::getNetxtFrame(FrameData& frameData) {
 
     int ret = 0;
@@ -389,6 +397,7 @@ bool DemuxingDecoding::getNetxtFrame(FrameData& frameData) {
         bool isValidFrame = true;
         ret = decode_videoPacket(video_dec_ctx, pkt, isValidFrame);
         if (isValidFrame) {
+            setFrameData(frameData);
             return true;
         }
     }
@@ -410,6 +419,7 @@ bool DemuxingDecoding::getNetxtFrame(FrameData& frameData) {
             }
             av_packet_unref(pkt);
             if(bVideoStream && isValidFrame) {
+                setFrameData(frameData);
                 return true;
             }
             if (ret < 0)
@@ -423,6 +433,7 @@ bool DemuxingDecoding::getNetxtFrame(FrameData& frameData) {
         bool isValidFrame = false;
         decode_videoPacket(video_dec_ctx, NULL, isValidFrame);
         if (isValidFrame) {
+            setFrameData(frameData);
             return true;
         }
     }

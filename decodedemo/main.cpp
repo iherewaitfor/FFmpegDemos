@@ -14,7 +14,6 @@ int main(LPWSTR lpCmdLine)
     if (nArgs > 2) {
         const wchar_t* argv_1 = szArglist[1];
         std::wcout << L"the argv[1] " << argv_1 <<std::endl;
-
         DemuxingDecoding* demuxingDecoding = new DemuxingDecoding(argv_1);
         FrameData frameData;
         int framecount = 0;
