@@ -22,7 +22,7 @@ link_directories(${PROJECT_SOURCE_DIR}/../ffmpeg-5.1.2/lib)
 add_executable(${PROJECT_NAME} ${DIR_SRCS})
 
 # 添加链接库
-#target_link_libraries(${PROJECT_NAME} decodecomponent )
+target_link_libraries(${PROJECT_NAME} avcodec.lib avdevice.lib avfilter.lib avformat.lib avutil.lib postproc.lib swresample.lib swscale.lib  )
 
 add_custom_command(TARGET ${PROJECT_NAME}
   POST_BUILD

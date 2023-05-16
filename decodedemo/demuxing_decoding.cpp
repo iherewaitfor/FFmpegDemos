@@ -1,32 +1,70 @@
 #include "demuxing_decoding.h"
+#include <Windows.h>
+//#include <stringapiset.h>
+wchar_t* TransformUTF8ToUnicodeM(const char* _str)
+{
+    int textlen = 0;
+    wchar_t* result = NULL;
+
+    if (_str)
+    {
+        textlen = MultiByteToWideChar(CP_UTF8, 0, _str, -1, NULL, 0);
+        result = (wchar_t*)malloc((textlen + 1) * sizeof(wchar_t));
+        memset(result, 0, (textlen + 1) * sizeof(wchar_t));
+        MultiByteToWideChar(CP_UTF8, 0, _str, -1, (LPWSTR)result, textlen);
+    }
+
+    return result;
+}
+
+char* TransformUnicodeToUTF8M(const wchar_t* _str)
+{
+    char* result = NULL;
+    int textlen = 0;
+
+    if (_str)
+    {
+        textlen = WideCharToMultiByte(CP_UTF8, 0, _str, -1, NULL, 0, NULL, NULL);
+        result = (char*)malloc((textlen + 1) * sizeof(char));
+        memset(result, 0, sizeof(char) * (textlen + 1));
+        WideCharToMultiByte(CP_UTF8, 0, _str, -1, result, textlen, NULL, NULL);
+    }
+
+    return result;
+}
 
 DemuxingDecoding::DemuxingDecoding(std::wstring filename) {
-    this->fmt_ctx = NULL;
+    fmt_ctx = NULL;
     video_dec_ctx = NULL;
     audio_dec_ctx;
     width = 0;
     height = 0;
-    enum AVPixelFormat pix_fmt;
-    AVStream* video_stream = NULL, * audio_stream = NULL;
-    const char* src_filename = NULL;
-    const char* video_dst_filename = NULL;
-    const char* audio_dst_filename = NULL;
-    FILE* video_dst_file = NULL;
-    FILE* audio_dst_file = NULL;
+    video_stream = NULL;
+    audio_stream = NULL;
+    src_filename = NULL;
+    video_dst_filename = NULL;
+    audio_dst_filename = NULL;
+    video_dst_file = NULL;
+    audio_dst_file = NULL;
+    video_dst_bufsize;
 
-    uint8_t* video_dst_data[4] = { NULL };
-    int      video_dst_linesize[4];
-    int video_dst_bufsize;
+    video_stream_idx = -1;
+    audio_stream_idx = -1;
+    frame = NULL;
+    pkt = NULL;
+    video_frame_count = 0;
+    audio_frame_count = 0;
 
-    int video_stream_idx = -1, audio_stream_idx = -1;
-    AVFrame* frame = NULL;
-    AVPacket* pkt = NULL;
-    int video_frame_count = 0;
-    int audio_frame_count = 0;
-
+    m_filename = filename;
     m_isInitSuccess = false;
     isFinish_av_read_frame = false;
     isFinish_avcodec_receive_frame = true;
+
+    init();
+}
+
+DemuxingDecoding::~DemuxingDecoding() {
+    uninit();
 }
 
 
@@ -64,10 +102,10 @@ int DemuxingDecoding::output_video_frame(AVFrame *frame)
 
 int DemuxingDecoding::output_audio_frame(AVFrame *frame)
 {
-    size_t unpadded_linesize = frame->nb_samples * av_get_bytes_per_sample(frame->format);
-    printf("audio_frame n:%d nb_samples:%d pts:%s\n",
-           audio_frame_count++, frame->nb_samples,
-           av_ts2timestr(frame->pts, &audio_dec_ctx->time_base));
+    size_t unpadded_linesize = frame->nb_samples * av_get_bytes_per_sample((enum AVSampleFormat)frame->format);
+    //printf("audio_frame n:%d nb_samples:%d pts:%s\n",
+    //       audio_frame_count++, frame->nb_samples,
+    //       av_ts2timestr(frame->pts, &audio_dec_ctx->time_base));
 
     /* Write the raw audio data samples of the first plane. This works
      * fine for packed formats (e.g. AV_SAMPLE_FMT_S16). However,
@@ -82,15 +120,14 @@ int DemuxingDecoding::output_audio_frame(AVFrame *frame)
     return 0;
 }
 
-int DemuxingDecoding::decode_packet(AVCodecContext *dec, const AVPacket *pkt, bool& bValidFrame)
+int DemuxingDecoding::decode_packet(AVCodecContext *dec, const AVPacket *pkt)
 {
     int ret = 0;
-    bValidFrame = false;
 
     // submit the packet to the decoder
     ret = avcodec_send_packet(dec, pkt);
     if (ret < 0) {
-        fprintf(stderr, "Error submitting a packet for decoding (%s)\n", av_err2str(ret));
+        //fprintf(stderr, "Error submitting a packet for decoding (%s)\n", av_err2str(ret));
         return ret;
     }
 
@@ -103,14 +140,13 @@ int DemuxingDecoding::decode_packet(AVCodecContext *dec, const AVPacket *pkt, bo
             if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN))
                 return 0;
 
-            fprintf(stderr, "Error during decoding (%s)\n", av_err2str(ret));
+            //fprintf(stderr, "Error during decoding (%s)\n", av_err2str(ret));
             return ret;
         }
 
         // write the frame data to output file
         if (dec->codec->type == AVMEDIA_TYPE_VIDEO) {
             ret = output_video_frame(frame);
-            bValidFrame = (ret == 0);
         }
         else
             ret = output_audio_frame(frame);
@@ -120,6 +156,71 @@ int DemuxingDecoding::decode_packet(AVCodecContext *dec, const AVPacket *pkt, bo
             return ret;
     }
 
+    return 0;
+}
+
+int DemuxingDecoding::decode_videoPacket(AVCodecContext* dec, const AVPacket* pkt, bool& bValidFrame)
+{
+    int ret = 0;
+    bValidFrame = false;
+
+    if (isFinish_avcodec_receive_frame) {
+        // submit the packet to the decoder
+        ret = avcodec_send_packet(dec, pkt);
+        if (ret < 0) {
+            //fprintf(stderr, "Error submitting a packet for decoding (%s)\n", av_err2str(ret));
+            return ret;
+        }
+    }
+
+    // get all the available frames from the decoder
+    while (ret >= 0 || !isFinish_avcodec_receive_frame) {
+        ret = avcodec_receive_frame(dec, frame);
+        if (ret < 0) {
+            isFinish_avcodec_receive_frame = true;
+            // those two return values are special and mean there is no output
+            // frame available, but there were no errors during decoding
+            if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN))
+                return 0;
+
+            //fprintf(stderr, "Error during decoding (%s)\n", av_err2str(ret));
+            return ret;
+        }
+        // write the frame data to output file
+        if (frame->width != width || frame->height != height ||
+            frame->format != pix_fmt) {
+            /* To handle this change, one could call av_image_alloc again and
+             * decode the following frames into another rawvideo file. */
+            fprintf(stderr, "Error: Width, height and pixel format have to be "
+                "constant in a rawvideo file, but the width, height or "
+                "pixel format of the input video changed:\n"
+                "old: width = %d, height = %d, format = %s\n"
+                "new: width = %d, height = %d, format = %s\n",
+                width, height, av_get_pix_fmt_name(pix_fmt),
+                frame->width, frame->height,
+                av_get_pix_fmt_name((enum AVPixelFormat)frame->format));
+            isFinish_avcodec_receive_frame = true;
+            return -1;
+        }
+
+        printf("video_frame n:%d coded_n:%d\n",
+            video_frame_count++, frame->coded_picture_number);
+
+        /* copy decoded frame to destination buffer:
+         * this is required since rawvideo expects non aligned data */
+        av_image_copy(video_dst_data, video_dst_linesize,
+            (const uint8_t**)(frame->data), frame->linesize,
+            pix_fmt, width, height);
+
+        /* write to rawvideo file */
+        fwrite(video_dst_data[0], 1, video_dst_bufsize, video_dst_file);
+        
+        ret = 0;
+        isFinish_avcodec_receive_frame = false;
+        bValidFrame = true;
+        av_frame_unref(frame);
+        return 0;
+    }
     return 0;
 }
 
@@ -206,10 +307,10 @@ int DemuxingDecoding::get_format_from_sample_fmt(const char **fmt,
 int DemuxingDecoding::init()
 {
     int ret = 0;
-    src_filename = "guilinvideo.mp4";
-    video_dst_filename = "videodest.h264";
+    //src_filename = "guilinvideo.mp4";
+    video_dst_filename = "guilinvideo.yuv";
     audio_dst_filename = "audiodest.mp3";
-
+    src_filename = TransformUnicodeToUTF8M(m_filename.c_str());
     do {
         /* open input file, and allocate format context */
         if (avformat_open_input(&fmt_ctx, src_filename, NULL, NULL) < 0) {
@@ -284,23 +385,32 @@ int DemuxingDecoding::init()
 bool DemuxingDecoding::getNetxtFrame(FrameData& frameData) {
 
     int ret = 0;
+    if (!isFinish_avcodec_receive_frame) {
+        bool isValidFrame = true;
+        ret = decode_videoPacket(video_dec_ctx, pkt, isValidFrame);
+        if (isValidFrame) {
+            return true;
+        }
+    }
     if (!isFinish_av_read_frame) {
-        bool isNeedBreakWhile = false;
         /* read frames from the file */
         while (av_read_frame(fmt_ctx, pkt) >= 0) {
             // check if the packet belongs to a stream we are interested in, otherwise
             // skip it
+
+            bool bVideoStream = false;
+            bool isValidFrame = false;
             if (pkt->stream_index == video_stream_idx) {
-                bool isValidFrame = false;
-                ret = decode_packet(video_dec_ctx, pkt, isValidFrame);
-                
+                bVideoStream = true;
+                ret = decode_videoPacket(video_dec_ctx, pkt, isValidFrame);
+
             }
             else if (pkt->stream_index == audio_stream_idx) {
                 ret = decode_packet(audio_dec_ctx, pkt);
             }
             av_packet_unref(pkt);
-            if (ret == 0 && ) {
-
+            if(bVideoStream && isValidFrame) {
+                return true;
             }
             if (ret < 0)
                 break;
@@ -309,11 +419,16 @@ bool DemuxingDecoding::getNetxtFrame(FrameData& frameData) {
 
     isFinish_av_read_frame = true;
     /* flush the decoders */
-    if (video_dec_ctx)
-        decode_packet(video_dec_ctx, NULL);
+    if (video_dec_ctx) {
+        bool isValidFrame = false;
+        decode_videoPacket(video_dec_ctx, NULL, isValidFrame);
+        if (isValidFrame) {
+            return true;
+        }
+    }
     if (audio_dec_ctx)
         decode_packet(audio_dec_ctx, NULL);
-
+    return false;
 }
 
 void DemuxingDecoding::uninit() {
