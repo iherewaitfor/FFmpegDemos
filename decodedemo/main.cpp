@@ -15,6 +15,15 @@ int main(LPWSTR lpCmdLine)
         const wchar_t* argv_1 = szArglist[1];
         std::wcout << L"the argv[1] " << argv_1 <<std::endl;
         DemuxingDecoding* demuxingDecoding = new DemuxingDecoding(argv_1);
+        VideoInfo videoInfo;
+        if (demuxingDecoding->getVideoInfo(videoInfo)) {
+            printf("pixFormat: %d \n", videoInfo.pix_fmt);
+            printf("width: %d \n", videoInfo.width);
+            printf("height: %d\n", videoInfo.height);
+            std::wcout << L"pixFormat:" << videoInfo.pix_fmt << std::endl;
+            std::wcout << L"width:" << videoInfo.width << std::endl;
+            std::wcout << L"height:" << videoInfo.height << std::endl;
+        }
         FrameData frameData;
         int framecount = 0;
         while (demuxingDecoding->getNetxtFrame(frameData)) {

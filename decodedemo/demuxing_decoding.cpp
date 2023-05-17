@@ -342,6 +342,7 @@ int DemuxingDecoding::init()
                 fprintf(stderr, "Could not allocate raw video buffer\n");
                 break;
             }
+            ret = 0;
             video_dst_bufsize = ret;
         }
         if (open_codec_context(&audio_stream_idx, &audio_dec_ctx, fmt_ctx, AVMEDIA_TYPE_AUDIO) >= 0) {
@@ -380,6 +381,16 @@ int DemuxingDecoding::init()
 
     m_isInitSuccess = (ret == 0);
     return ret;
+}
+
+bool DemuxingDecoding::getVideoInfo(VideoInfo& videoInfo) {
+    if (m_isInitSuccess) {
+        videoInfo.pix_fmt = pix_fmt;
+        videoInfo.width = width;
+        videoInfo.height = height;
+        return true;
+    }
+    return false;
 }
 void DemuxingDecoding::setFrameData(FrameData& frameData) {
     for (int i = 0; i < 3; i++) {

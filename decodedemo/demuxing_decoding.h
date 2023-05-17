@@ -14,11 +14,17 @@ struct FrameData {
     int width;
     int height;
 };
+struct VideoInfo {
+    enum AVPixelFormat pix_fmt;
+    int width;
+    int height;
+};
 class DemuxingDecoding {
 public:
     DemuxingDecoding(std::wstring filename);
     ~DemuxingDecoding();
     bool getNetxtFrame(FrameData &frameData);
+    bool getVideoInfo(VideoInfo& videoInfo);
 private:
     int output_video_frame(AVFrame* frame);
     int output_audio_frame(AVFrame* frame);
