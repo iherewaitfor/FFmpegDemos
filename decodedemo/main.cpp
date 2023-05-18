@@ -40,6 +40,8 @@ int main(LPWSTR lpCmdLine)
                 scalingVideo->scaleVideo(frameData.dst_data, frameData.dst_linesizes, 0, frameData.height);
                 /* write scaled image to file */
                 fwrite(scalingVideo->dst_data[0], 1, scalingVideo->dst_bufsize, dst_file);
+                fclose(dst_file);
+                delete scalingVideo;
             }
 
         }

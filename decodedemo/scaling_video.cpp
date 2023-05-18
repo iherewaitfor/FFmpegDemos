@@ -6,7 +6,7 @@ ScalingVideo::ScalingVideo(int srcW, int srcH, enum AVPixelFormat srcFormat,
     init();
 }
 ScalingVideo::~ScalingVideo() {
-
+    uninit();
 }
 bool ScalingVideo::init() {
     bool isSuccess = true;
@@ -25,6 +25,10 @@ bool ScalingVideo::init() {
     }
     dst_bufsize = ret;
     return isSuccess;
+}
+void ScalingVideo::uninit() {
+    av_freep(&dst_data[0]);
+    sws_freeContext(sws_ctx);
 }
 int ScalingVideo::scaleVideo(const uint8_t* const srcSlice[],
     const int srcStride[], int srcSliceY, int srcSliceH) {
