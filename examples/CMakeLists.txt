@@ -62,8 +62,7 @@ set (FFMPEG_DLLS
 set (FFMPEG_DLLS_DIR "${PROJECT_SOURCE_DIR}/../ffmpeg-5.1.2/bin")
 # 添加子目录
 add_subdirectory(demuxing_decoding)
-
-# 添加子目录
 add_subdirectory(scaling_video)
 add_subdirectory(encode_video)
 add_subdirectory(muxing)
+add_subdirectory(filtering_video)
