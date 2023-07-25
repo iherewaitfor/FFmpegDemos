@@ -1,5 +1,5 @@
 #Cmake 最低版本号要求
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 # 项目信息
 project (demuxing_decoding) # 可以使用${PROJECT_NAME}引用项目名称

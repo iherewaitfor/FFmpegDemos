@@ -367,16 +367,16 @@ int main (int argc, char **argv)
     }
 
 end:
-    avcodec_free_context(&video_dec_ctx);
-    avcodec_free_context(&audio_dec_ctx);
-    avformat_close_input(&fmt_ctx);
+    avcodec_free_context(&video_dec_ctx); // AVCodecContext * 
+    avcodec_free_context(&audio_dec_ctx); //AVCodecContext * 
+    avformat_close_input(&fmt_ctx);       //AVFormatContext *fmt_ctx
     if (video_dst_file)
         fclose(video_dst_file);
     if (audio_dst_file)
         fclose(audio_dst_file);
-    av_packet_free(&pkt);
-    av_frame_free(&frame);
-    av_free(video_dst_data[0]);
+    av_packet_free(&pkt);               //AVPacket *
+    av_frame_free(&frame);              //AVFrame *
+    av_free(video_dst_data[0]);         //uint8_t *video_dst_data[4]
 
     return ret < 0;
 }
