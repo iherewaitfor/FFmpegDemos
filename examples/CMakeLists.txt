@@ -66,3 +66,4 @@ add_subdirectory(demuxing_decoding)
 # 添加子目录
 add_subdirectory(scaling_video)
 add_subdirectory(encode_video)
+add_subdirectory(muxing)
