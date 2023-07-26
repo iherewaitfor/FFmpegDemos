@@ -38,7 +38,7 @@
 #include <libavfilter/buffersrc.h>
 #include <libavutil/opt.h>
 
-const char *filter_descr = "scale=78:24,transpose=cclock";
+const char *filter_descr = "scale=360:640,transpose=cclock";
 /* other way:
    scale=78:24 [scl]; [scl] transpose=cclock // assumes "[in]" and "[out]" to be input output pads respectively
  */
@@ -98,7 +98,7 @@ static int init_filters(const char *filters_descr)
     AVFilterInOut *outputs = avfilter_inout_alloc();
     AVFilterInOut *inputs  = avfilter_inout_alloc();
     AVRational time_base = fmt_ctx->streams[video_stream_index]->time_base;
-    enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_GRAY8, AV_PIX_FMT_NONE };
+    enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_RGBA, AV_PIX_FMT_NONE };
 
     filter_graph = avfilter_graph_alloc();
     if (!outputs || !inputs || !filter_graph) {
@@ -176,35 +176,26 @@ end:
     return ret;
 }
 
+HANDLE g_hshareMemMapping = NULL;
+LPVOID g_lpShareMemBase = NULL;
+void initSharedMemory(int Width, int Height) {
+
+
+    if (g_hshareMemMapping == NULL) {
+        g_hshareMemMapping = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, Width * Height * 4, "myShareMemRGBA123");
+        g_lpShareMemBase = MapViewOfFile(g_hshareMemMapping, FILE_MAP_WRITE | FILE_MAP_READ, 0, 0, 0);
+    }
+}
+
 static void display_frame(const AVFrame *frame, AVRational time_base)
 {
-    int x, y;
-    uint8_t *p0, *p;
-    int64_t delay;
-
-    if (frame->pts != AV_NOPTS_VALUE) {
-        if (last_pts != AV_NOPTS_VALUE) {
-            /* sleep roughly the right amount of time;
-             * usleep is in microseconds, just like AV_TIME_BASE. */
-            delay = av_rescale_q(frame->pts - last_pts,
-                                 time_base, AV_TIME_BASE_Q);
-            if (delay > 0 && delay < 1000000)
-                Sleep(delay);
-        }
-        last_pts = frame->pts;
+    int width = frame->width;
+    int height = frame->height;
+    initSharedMemory(width, height);
+    if (g_lpShareMemBase) {
+        memcpy_s(g_lpShareMemBase, width * height * 4, frame->data[0], width * height * 4); // 复制到共享内存
     }
-
-    /* Trivial ASCII grayscale display. */
-    p0 = frame->data[0];
-    puts("\033c");
-    for (y = 0; y < frame->height; y++) {
-        p = p0;
-        for (x = 0; x < frame->width; x++)
-            putchar(" .-+#"[*(p++) / 52]);
-        putchar('\n');
-        p0 += frame->linesize[0];
-    }
-    fflush(stdout);
+    Sleep(50);
 }
 
 int main(int argc, char **argv)
