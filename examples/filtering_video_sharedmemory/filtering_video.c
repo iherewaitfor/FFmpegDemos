@@ -179,10 +179,8 @@ end:
 HANDLE g_hshareMemMapping = NULL;
 LPVOID g_lpShareMemBase = NULL;
 void initSharedMemory(int Width, int Height) {
-
-
     if (g_hshareMemMapping == NULL) {
-        g_hshareMemMapping = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, Width * Height * 4, "myShareMemRGBA123");
+        g_hshareMemMapping = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, Width * Height * 4, "myShareMemRGBA456");
         g_lpShareMemBase = MapViewOfFile(g_hshareMemMapping, FILE_MAP_WRITE | FILE_MAP_READ, 0, 0, 0);
     }
 }
