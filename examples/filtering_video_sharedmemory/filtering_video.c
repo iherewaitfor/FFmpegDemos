@@ -193,7 +193,23 @@ static void display_frame(const AVFrame *frame, AVRational time_base)
     if (g_lpShareMemBase) {
         memcpy_s(g_lpShareMemBase, width * height * 4, frame->data[0], width * height * 4); // 复制到共享内存
     }
-    Sleep(50);
+    int64_t delay;
+    if (frame->pts != AV_NOPTS_VALUE) {
+        if (last_pts != AV_NOPTS_VALUE) {
+            /* sleep roughly the right amount of time;
+             * usleep is in microseconds, just like AV_TIME_BASE. */
+            delay = av_rescale_q(frame->pts - last_pts,
+                time_base, AV_TIME_BASE_Q);
+            if (delay > 0 && delay < 1000000) {
+                DWORD delayMs = delay / 1000;
+                Sleep(delayMs);
+            }
+        }
+        last_pts = frame->pts;
+    }
+    else {
+        Sleep(50);
+    }
 }
 
 int main(int argc, char **argv)
