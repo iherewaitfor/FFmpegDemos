@@ -38,7 +38,17 @@
 #include <libavfilter/buffersrc.h>
 #include <libavutil/opt.h>
 
-const char *filter_descr = "scale=360:640,transpose=cclock";
+//split [main][tmp]; [tmp] crop=iw:ih/2:0:0, vflip [flip]; [main][flip] overlay=0:H/2"
+ //const char *filter_descr = "scale=360:640,transpose=clock_flip,split [main][tmp]; [tmp] crop=iw:ih/2:0:0, vflip [flip]; [main][flip] overlay=0:H/2";
+const char *filter_descr = "scale=640:360,split [main][tmp]; [tmp] crop=iw:ih/2:0:0, vflip [flip]; [main][flip] overlay=0:H/2";
+
+//没写输入，默认输入就是[in]
+// 中间的label可以自己定义。这时定义了为[test]
+//没写输出 ，默认输出就是[out]
+//const char* filter_descr = "scale=360:640 [test];[test]transpose=clock_flip";
+
+//const char* filter_descr = "scale=640:360 [test];[test]transpose=cclock,transpose=cclock";
+//const char *filter_descr = "scale=360:640,transpose=cclock";
 /* other way:
    scale=78:24 [scl]; [scl] transpose=cclock // assumes "[in]" and "[out]" to be input output pads respectively
  */
@@ -95,8 +105,8 @@ static int init_filters(const char *filters_descr)
     int ret = 0;
     const AVFilter *buffersrc  = avfilter_get_by_name("buffer");
     const AVFilter *buffersink = avfilter_get_by_name("buffersink");
-    AVFilterInOut *outputs = avfilter_inout_alloc();
-    AVFilterInOut *inputs  = avfilter_inout_alloc();
+    AVFilterInOut *outputs = avfilter_inout_alloc(); //buffer source's output
+    AVFilterInOut *inputs  = avfilter_inout_alloc(); //buffer sink's input
     AVRational time_base = fmt_ctx->streams[video_stream_index]->time_base;
     enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_RGBA, AV_PIX_FMT_NONE };
 
@@ -146,7 +156,7 @@ static int init_filters(const char *filters_descr)
      * filter input label is not specified, it is set to "in" by
      * default.
      */
-    outputs->name       = av_strdup("in");
+    outputs->name       = av_strdup("in"); //filters_descr未指定，默认为in
     outputs->filter_ctx = buffersrc_ctx;
     outputs->pad_idx    = 0;
     outputs->next       = NULL;
@@ -157,7 +167,7 @@ static int init_filters(const char *filters_descr)
      * filter output label is not specified, it is set to "out" by
      * default.
      */
-    inputs->name       = av_strdup("out");
+    inputs->name       = av_strdup("out"); // filters_descr未指定，默认为out
     inputs->filter_ctx = buffersink_ctx;
     inputs->pad_idx    = 0;
     inputs->next       = NULL;
