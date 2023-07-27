@@ -37,7 +37,7 @@
 图：相关数据结构
 
 # How to Run
-[构建编译请参考](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples#how-to-build-%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA)
+[构建编译请点击本链接](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples#how-to-build-%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA)
 
 如何运行
 

@@ -51,3 +51,7 @@ cmake .. -G "Visual Studio 17 2022" -A win32
 ```
 
 # 解封装及解码 demuxing_decoding
+
+本示例展示如何进行解封装及解码
+具体说明请查看文件
+[demuxing_decoding README.md](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/demuxing_decoding)
