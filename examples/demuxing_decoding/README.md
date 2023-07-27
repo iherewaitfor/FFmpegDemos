@@ -1,6 +1,34 @@
 # demuxing_decoding 解封装解码
 本例子的功能是把一个视频文件，进行解封装，解码，把把解码后的视频数据和音频数据分别写到一个文件时去。
 
+整体流程:
+
+解封装-->解码器-->从容器读取AVPacketpacket-->送解码器解码-->从解码器取出AVFrame.
+
+
+
+图解核心逻辑请参考：
+[ffmpega数据结构及操作图](https://kdocs.cn/l/cp88RyxsqkMM)
+
+![编解码](../images/demuxing_decoding_decode.png)
+
+图：编解码
+
+
+![容器核心数据](../images/demuxing_decoding_avformat.png)
+
+图：容器核心数据
+
+![解码器核心逻辑](../images/demuxing_decoding_avcode.png)
+
+图：解码器核心逻辑
+
+![相关数据结构](../images/demuxing_decoding_datastructs.png)
+
+图：相关数据结构
+
+
+
 # Demuxing解封装
 
  	Demuxers read a media file and split it into chunks of data (packets). A packet contains one or more encoded frames which belongs to a single elementary stream. In the lavf API this process is represented by the avformat_open_input() function for opening a file, av_read_frame() for reading a single packet and finally avformat_close_input(), which does the cleanup.
@@ -72,6 +100,9 @@ int av_image_alloc(uint8_t *pointers[4], int linesizes[4],
     av_frame_free(&frame);              //AVFrame *
     av_free(video_dst_data[0]);         //uint8_t *video_dst_data[4]
 ```
+# 解码
+
+
 
 # 参考
 [https://ffmpeg.org/doxygen/5.1/index.html](https://ffmpeg.org/doxygen/5.1/index.html)
