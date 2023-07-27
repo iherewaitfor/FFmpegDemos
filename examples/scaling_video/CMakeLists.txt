@@ -20,72 +20,12 @@ link_directories(${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/lib)
 # 指定生成目标
 add_executable(${PROJECT_NAME} ${DIR_SRCS})
 
+set_target_properties(${PROJECT_NAME} PROPERTIES
+					ARCHIVE_OUTPUT_DIRECTORY "${TARGET_OUT_DIR}"
+					RUNTIME_OUTPUT_DIRECTORY "${TARGET_OUT_DIR}"
+					LIBRARY_OUTPUT_DIRECTORY "${TARGET_OUT_DIR}")
+
 # 添加链接库
 target_link_libraries(${PROJECT_NAME} avcodec.lib avdevice.lib avfilter.lib avformat.lib avutil.lib postproc.lib swresample.lib swscale.lib )
 
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avcodec-59.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avdevice-59.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avfilter-8.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )  
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avformat-59.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avutil-57.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/postproc-56.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/swresample-4.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/swscale-6.dll ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
-  )
-
-
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avcodec-59.dll ${PROJECT_BINARY_DIR}
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avdevice-59.dll ${PROJECT_BINARY_DIR}
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avfilter-8.dll ${PROJECT_BINARY_DIR}
-  )  
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avformat-59.dll ${PROJECT_BINARY_DIR}
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/avutil-57.dll ${PROJECT_BINARY_DIR}
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/postproc-56.dll ${PROJECT_BINARY_DIR}
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/swresample-4.dll ${PROJECT_BINARY_DIR}
-  )
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../ffmpeg-5.1.2/bin/swscale-6.dll ${PROJECT_BINARY_DIR}
-  )
+COPY_FILES("${PROJECT_NAME}" "${FFMPEG_DLLS}" "${FFMPEG_DLLS_DIR}"  "${TARGET_OUT_DIR}")
