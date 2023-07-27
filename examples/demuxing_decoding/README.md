@@ -1,5 +1,7 @@
 - [demuxing\_decoding 解封装解码](#demuxing_decoding-解封装解码)
-- [How to Run](#how-to-run)
+- [编译和运行 How to Run](#编译和运行-how-to-run)
+  - [构建和编译](#构建和编译)
+  - [如何运行](#如何运行)
 - [Demuxing解封装](#demuxing解封装)
 - [资源的申请和释放](#资源的申请和释放)
   - [资源申请](#资源申请)
@@ -36,10 +38,11 @@
 
 图：相关数据结构
 
-# How to Run
+# 编译和运行 How to Run
+## 构建和编译
 [构建编译请点击本链接](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples#how-to-build-%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA)
 
-如何运行
+## 如何运行
 
 demuxing_decoding.exe  input_file video_output_file audio_output_file
 

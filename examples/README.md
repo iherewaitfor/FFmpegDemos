@@ -1,6 +1,7 @@
 - [FFMpegs Examples示例文档](#ffmpegs-examples示例文档)
   - [How to Build 如何构建](#how-to-build-如何构建)
 - [解封装及解码 demuxing\_decoding](#解封装及解码-demuxing_decoding)
+- [封装及编码 muxing\_encoding](#封装及编码-muxing_encoding)
 
 
 # FFMpegs Examples示例文档
@@ -52,6 +53,11 @@ cmake .. -G "Visual Studio 17 2022" -A win32
 
 # 解封装及解码 demuxing_decoding
 
-本示例展示如何进行解封装及解码
+本示例展示如何进行解封装及解码。
 具体说明请查看文件
 [demuxing_decoding README.md](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/demuxing_decoding)
+
+# 封装及编码 muxing_encoding
+
+ 本示例展示如何进行解封装及解码。
+详解查看文件
