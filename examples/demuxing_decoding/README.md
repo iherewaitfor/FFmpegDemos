@@ -37,8 +37,24 @@
 图：相关数据结构
 
 # How to Run
-编译请参考
-运行
+[构建编译请参考](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples#how-to-build-%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA)
+
+如何运行
+
+demuxing_decoding.exe  input_file video_output_file audio_output_file
+
+如：
+```
+demuxing_decoding.exe  D:/a.mp4  a.yuv audio
+```
+
+根据传入的视频文件，会有对应的输出，说明如何使用ffplay播放这些解码后的数据。
+```
+Play the output video file with the command:
+ffplay -f rawvideo -pixel_format yuv420p -video_size 1280x720 out.yuv
+Play the output audio file with the command:
+ffplay -f f32le -ac 1 -ar 44100 audio
+```
 
 
 # Demuxing解封装
