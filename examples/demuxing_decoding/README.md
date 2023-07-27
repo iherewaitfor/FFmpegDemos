@@ -129,8 +129,21 @@ int av_image_alloc(uint8_t *pointers[4], int linesizes[4],
     av_free(video_dst_data[0]);         //uint8_t *video_dst_data[4]
 ```
 # 解码
+解码核心逻辑
 
+- 从文件中读出AVPacket
+- 把AVPacket送到解码器
+- 从解码器取AVFrame
+```C++
+    /* read frames from the file */
+    av_read_frame(fmt_ctx, pkt)
 
+    // submit the packet to the decoder
+    avcodec_send_packet(dec, pkt);
+
+    // get the available frame from the decoder
+    avcodec_receive_frame(dec, frame)
+```
 
 # 参考
 [https://ffmpeg.org/doxygen/5.1/index.html](https://ffmpeg.org/doxygen/5.1/index.html)
