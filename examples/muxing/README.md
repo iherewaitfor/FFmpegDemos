@@ -1,3 +1,15 @@
+- [封装及编码muxing and encoding](#封装及编码muxing-and-encoding)
+- [编译及运行](#编译及运行)
+  - [构建编译 请参考](#构建编译-请参考)
+  - [运行](#运行)
+- [容器操作](#容器操作)
+  - [生成容器](#生成容器)
+  - [给容器添加流](#给容器添加流)
+  - [向容器添加音视频帧](#向容器添加音视频帧)
+  - [把容器内数据全部写到文件](#把容器内数据全部写到文件)
+- [编码器生成](#编码器生成)
+
+
 # 封装及编码muxing and encoding
 本例子的功能是讲解如何 封装及编码 并输出文件。其中的视频数据和音频数据为程序生成。实际应用中，一般从设备采集视频帧和音频帧源数据。
 
@@ -41,6 +53,37 @@ muxing.exe outputfile
 muxing.exe data.mp4
 ```
 生成的data.mp4可以直接用播放器播放。该文件包括音频流和视频流。
-# 
+# 容器操作
+
+## 生成容器
+生成容器，并给容器填充相关的参数。
+filename为容器对应的文件。
+``` C++
+    const AVOutputFormat *fmt;
+    AVFormatContext *oc;
+    /* allocate the output media context */
+    avformat_alloc_output_context2(&oc, NULL, NULL, filename);
+    fmt = oc->oformat;
+
+     /* Write the stream header, if any. */
+    ret = avformat_write_header(oc, &opt);
+```
+## 给容器添加流
+给容器添加流，并指定流的id。
+```C++
+    ost->st = avformat_new_stream(oc, NULL);
+    ost->st->id = oc->nb_streams-1;
+```
+## 向容器添加音视频帧
+pkt为编码后的音视频AVPacket.
+```C++
+    av_interleaved_write_frame(fmt_ctx, pkt);
+```
+## 把容器内数据全部写到文件
+把容器里的流的尾部写到文件。
+```C++
+    av_write_trailer(oc);
+```
+# 编码器生成
 
 
