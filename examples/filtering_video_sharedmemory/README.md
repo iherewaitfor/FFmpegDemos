@@ -73,6 +73,64 @@ Demo.exe myShareMemRGBA456 640 360
 即可以看到视频过滤后的效果了。
 
 直接运行
+# 过滤器各数据结构之间关系
+![过滤器各数据结构之间关系](../images/filtering_video_sharedmemory_dadatstructs.png)
+# 过滤器图AVFilterGraph
+创建对象
+```C++
+    avfilter_graph_alloc();
+```
+过滤图初始化、校验配置是否有效。
+```C++
+    avfilter_graph_parse_ptr(filter_graph, filters_descr,
+                                    &inputs, &outputs, NULL))
+
+    avfilter_graph_config(filter_graph, NULL)
+```
+
+释放对象
+```C=+
+    avfilter_graph_free(&filter_graph);
+```
+# 过滤器AVFilter及上下文AVFilterContext
+## 过滤器的获取及初始化
+申请source过滤器和sink过滤器。
+```C++
+    const AVFilter *buffersrc  = avfilter_get_by_name("buffer");
+    const AVFilter *buffersink = avfilter_get_by_name("buffersink");
+```
+
+构建参数，创建AVFilterContext。包括source和sink
+
+```C++
+    /* buffer video source: the decoded frames from the decoder will be inserted here. */
+    snprintf(args, sizeof(args),
+            "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
+            dec_ctx->width, dec_ctx->height, dec_ctx->pix_fmt,
+            time_base.num, time_base.den,
+            dec_ctx->sample_aspect_ratio.num, dec_ctx->sample_aspect_ratio.den);
+    avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in", args, NULL, filter_graph);
+    avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out",
+                                       NULL, NULL, filter_graph);
+```
+设置上下文参数
+```C++
+    enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_RGBA, AV_PIX_FMT_NONE };
+    av_opt_set_int_list(buffersink_ctx, "pix_fmts", pix_fmts,
+                                AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN);
+```
+## 过滤操作
+把解码后的AVFrame送入过滤图的入口过滤器source
+```C++
+    /* push the decoded frame into the filtergraph */
+    av_buffersrc_add_frame_flags(buffersrc_ctx, frame, AV_BUFFERSRC_FLAG_KEEP_REF)
+```
+从过滤图的出口过滤器sink中取得过滤后的AVFrame
+```c++
+    /* pull filtered frames from the filtergraph */
+    av_buffersink_get_frame(buffersink_ctx, filt_frame)
+```
+
 
 # 参考
 [https://ffmpeg.org/ffmpeg-filters.html](https://ffmpeg.org/ffmpeg-filters.html)
