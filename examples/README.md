@@ -71,6 +71,6 @@ cmake .. -G "Visual Studio 17 2022" -A win32
 
 # 过滤视频 filtering_vidoe_sharedmemory
 本示例，展示了如何过滤视频，并把过滤后视频帧写到共享内存中。可通过其他进程从共享内存中读取，并渲染到窗口上。
-详解查看
+详解查看[filtering_video_sharedmemory的README.md](https://github.com/iherewaitfor/FFmpegDemos/blob/main/examples/filtering_video_sharedmemory/README.md)
 示例代码[https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/filtering_video_sharedmemory](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/filtering_video_sharedmemory)
 
