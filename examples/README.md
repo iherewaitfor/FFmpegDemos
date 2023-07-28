@@ -1,7 +1,9 @@
 - [FFMpegs Examples示例文档](#ffmpegs-examples示例文档)
   - [How to Build 如何构建](#how-to-build-如何构建)
 - [解封装及解码 demuxing\_decoding](#解封装及解码-demuxing_decoding)
+- [纯视频编码](#纯视频编码)
 - [封装及编码 muxing](#封装及编码-muxing)
+- [过滤视频 filtering\_vidoe\_sharedmemory](#过滤视频-filtering_vidoe_sharedmemory)
 
 
 # FFMpegs Examples示例文档
@@ -57,9 +59,18 @@ cmake .. -G "Visual Studio 17 2022" -A win32
 具体说明请查看文件
 [demuxing_decoding README.md](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/demuxing_decoding)
 
+# 纯视频编码
+
+
 # 封装及编码 muxing
 
  本示例展示如何进行解封装及解码。
 详解查看[muxing项目README.md](https://github.com/iherewaitfor/FFmpegDemos/blob/main/examples/muxing/README.md)
 
 示例代码[https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/muxing](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/muxing)
+
+# 过滤视频 filtering_vidoe_sharedmemory
+本示例，展示了如何过滤视频，并把过滤后视频帧写到共享内存中。可通过其他进程从共享内存中读取，并渲染到窗口上。
+详解查看
+示例代码[https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/filtering_video_sharedmemory](https://github.com/iherewaitfor/FFmpegDemos/tree/main/examples/filtering_video_sharedmemory)
+
