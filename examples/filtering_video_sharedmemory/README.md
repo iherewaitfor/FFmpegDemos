@@ -130,7 +130,44 @@ Demo.exe myShareMemRGBA456 640 360
     /* pull filtered frames from the filtergraph */
     av_buffersink_get_frame(buffersink_ctx, filt_frame)
 ```
+# AVFilterInOut过滤器输入输出
+申请输入输出及初始化
+```C++
+    AVFilterInOut *outputs = avfilter_inout_alloc(); //buffer source's output
+    AVFilterInOut *inputs  = avfilter_inout_alloc(); //buffer sink's input
 
+    /*
+     * Set the endpoints for the filter graph. The filter_graph will
+     * be linked to the graph described by filters_descr.
+     */
+
+    /*
+     * The buffer source output must be connected to the input pad of
+     * the first filter described by filters_descr; since the first
+     * filter input label is not specified, it is set to "in" by
+     * default.
+     */
+    outputs->name       = av_strdup("in"); //filters_descr未指定，默认为in
+    outputs->filter_ctx = buffersrc_ctx;
+    outputs->pad_idx    = 0;
+    outputs->next       = NULL;
+
+    /*
+     * The buffer sink input must be connected to the output pad of
+     * the last filter described by filters_descr; since the last
+     * filter output label is not specified, it is set to "out" by
+     * default.
+     */
+    inputs->name       = av_strdup("out"); // filters_descr未指定，默认为out
+    inputs->filter_ctx = buffersink_ctx;
+    inputs->pad_idx    = 0;
+    inputs->next       = NULL;
+```
+释放 
+```C++
+    avfilter_inout_free(&inputs);
+    avfilter_inout_free(&outputs);
+```
 
 # 参考
 [https://ffmpeg.org/ffmpeg-filters.html](https://ffmpeg.org/ffmpeg-filters.html)
